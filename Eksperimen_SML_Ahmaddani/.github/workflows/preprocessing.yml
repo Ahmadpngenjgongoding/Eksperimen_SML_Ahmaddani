@@ -1,0 +1,37 @@
+name: Automated Data Preprocessing
+
+on:
+  push:
+    paths:
+      - "dataset_raw/**"
+      - "preprocessing/automate_Ahmaddani.py"
+  workflow_dispatch:
+
+jobs:
+  preprocess:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: pip install pandas
+
+      - name: Run preprocessing automation
+        working-directory: preprocessing
+        run: python automate_Ahmaddani.py
+
+      - name: Commit & push updated preprocessed dataset
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add preprocessing/dataset_preprocessing.csv
+          git diff --cached --quiet || git commit -m "ci: update preprocessed dataset [skip ci]"
+          git push
